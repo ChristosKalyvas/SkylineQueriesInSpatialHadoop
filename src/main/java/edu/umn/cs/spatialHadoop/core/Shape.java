@@ -33,7 +33,10 @@ public interface Shape extends Writable, Cloneable, TextSerializable {
    * @return The Euclidean distance between this object and the given point
    */
   public double distanceTo(double x, double y);
-  
+  public int distanceTo2(int x, int y);
+  public double distanceToEuclidean(double x, double y); 
+  public double distanceToManchatan(double x, double y);  
+
   /**
    * Returns true if this shape is intersected with the given shape
    * @param s The other shape to test for intersection with this shape

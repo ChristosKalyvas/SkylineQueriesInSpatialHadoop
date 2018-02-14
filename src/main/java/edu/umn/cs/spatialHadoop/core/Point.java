@@ -6,12 +6,14 @@
 * http://www.opensource.org/licenses/apache2.0.php.
 *
 *************************************************************************/
-package edu.umn.cs.spatialHadoop.core;  
+package edu.umn.cs.spatialHadoop.core;
 
 import java.awt.Graphics;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import org.apache.hadoop.io.Text;
 
@@ -25,13 +27,16 @@ import edu.umn.cs.spatialHadoop.io.TextSerializerHelper;
 public class Point implements Shape, Comparable<Point> {
 	public double x;
 	public double y;
+	public double distance;
 
+		
 	public Point() {
 		this(0, 0);
 	}
 	
 	public Point(double x, double y) {
 	  set(x, y);
+	  setdistance(x,y);
 	}
 	
 
@@ -39,15 +44,22 @@ public class Point implements Shape, Comparable<Point> {
 	 * A copy constructor from any shape of type Point (or subclass of Point)
 	 * @param s
 	 */
-	public Point(Point s) {
+  public Point(Point s) {   //ok
 	  this.x = s.x;
 	  this.y = s.y;
-  }
+	  this.distance=s.distance;
 
-  public void set(double x, double y) {
+    }
+
+  public void set(double x, double y) { //ok
 		this.x = x;
 		this.y = y;
 	}
+  
+  public void setdistance(double x, double y) { //ok
+		this.distance=this.distanceTo(x,y);
+	}
+  
 
 	public void write(DataOutput out) throws IOException {
 		out.writeDouble(x);
@@ -90,12 +102,37 @@ public class Point implements Shape, Comparable<Point> {
 		return result;
 	}
 
+	
 	public double distanceTo(Point s) {
 		double dx = s.x - this.x;
 		double dy = s.y - this.y;
 		return Math.sqrt(dx*dx+dy*dy);
 	}
 	
+
+		
+	public int distanceTo2(int x, int y) { //old
+		return (int) Math.abs((( x/2 - this.x/2) + ( y/2 -  this.y/2)));
+	}
+	
+	  @Override
+	  public double distanceTo(double px, double py) { //old
+	    double dx = x - px;
+	    double dy = y - py;
+	    return Math.sqrt(dx * dx + dy * dy);
+	  }
+	  	
+
+	  public double distanceToEuclidean(double px, double py){ 
+		    double dx = this.x - px;
+		    double dy = this.y - py;
+		    return Math.sqrt(dx * dx + dy * dy);
+	  }
+	
+	 public double distanceToManchatan(double px, double py){ //same as distanceTo
+			return  Math.abs(( (this.x - px/2) + (this.y - py/2) ));
+	  }
+
 	@Override
 	public Point clone() {
 	  return new Point(this.x, this.y);
@@ -116,12 +153,7 @@ public class Point implements Shape, Comparable<Point> {
     return new Rectangle(x, y, x + Math.ulp(x), y + Math.ulp(y));
   }
 
-  @Override
-  public double distanceTo(double px, double py) {
-    double dx = x - px;
-    double dy = y - py;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
+
 
   public Shape getIntersection(Shape s) {
     return getMBR().getIntersection(s);
@@ -150,32 +182,29 @@ public class Point implements Shape, Comparable<Point> {
     y = TextSerializerHelper.consumeDouble(text, '\0');
   }
 
-  @Override
+ @Override
   public int compareTo(Point o) {
-    if (x < o.x)
-      return -1;
-    if (x > o.x)
-      return 1;
-    if (y < o.y)
-      return -1;
-    if (y > o.y)
-      return 1;
-    return 0;
+   	 if(distance<o.distance) return -1;
+	 if(distance>o.distance) return  1;	 
+	 return 0;
   }
+ 
 
   @Override
   public void draw(Graphics g, Rectangle fileMBR, int imageWidth,
   		int imageHeight, double scale) {
-    int imageX = (int) Math.floor((this.x - fileMBR.x1) * imageWidth / fileMBR.getWidth());
-    int imageY = (int) Math.floor((this.y - fileMBR.y1) * imageHeight / fileMBR.getHeight());
+    int imageX = (int) Math.round((this.x - fileMBR.x1) * imageWidth / fileMBR.getWidth());
+    int imageY = (int) Math.round((this.y - fileMBR.y1) * imageHeight / fileMBR.getHeight());
     g.fillRect(imageX, imageY, 1, 1);  	
   }
   
   @Override
   public void draw(Graphics g, double xscale, double yscale) {
-    int imgx = (int) Math.floor(x * xscale);
-    int imgy = (int) Math.floor(y * yscale);
+    int imgx = (int) Math.round(x * xscale);
+    int imgy = (int) Math.round(y * yscale);
     g.fillRect(imgx, imgy, 1, 1);
   }
+
+
 
 }
