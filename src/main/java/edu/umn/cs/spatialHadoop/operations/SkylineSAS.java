@@ -579,7 +579,7 @@ public class SkylineSAS {
     
     if (userOutPath == null)
       outFs.delete(outPath, true);
-  }
+  } 
   
   public static void skyline(Path inFile, Path outFile, OperationsParams params) throws IOException, InterruptedException {
     if (OperationsParams.isLocal(params, inFile)) {
