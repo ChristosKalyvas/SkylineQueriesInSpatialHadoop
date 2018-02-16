@@ -879,7 +879,7 @@ public static <S extends Shape> long rangeQueryLocal(Path inPath,
 		    output.collect(dummyKey, s);		    
 		  }
 		}
-}
+} 
   
   public static class ReverseSkylineReducer extends MapReduceBase implements Reducer<NullWritable,Point,NullWritable,Point> {  
 	  
